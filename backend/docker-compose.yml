@@ -1,0 +1,18 @@
+services:
+  db:
+    image: postgis/postgis:15-3.4
+    environment: { POSTGRES_USER: crashaid, POSTGRES_PASSWORD: crashaid, POSTGRES_DB: crashaid }
+    volumes: ["pgdata:/var/lib/postgresql/data", "./db/schema.sql:/docker-entrypoint-initdb.d/schema.sql"]
+    ports: ["5432:5432"]
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+  api:
+    build: .
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://crashaid:crashaid@db:5432/crashaid
+      REDIS_URL: redis://redis:6379
+    depends_on: [db, redis]
+    ports: ["4000:4000"]
+volumes: { pgdata: {} }
