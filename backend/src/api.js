@@ -7,6 +7,7 @@ const STATUSES = ['new', 'dispatched', 'en_route', 'on_scene', 'resolved', 'canc
 const INC = `SELECT i.id, i.description, i.severity, i.status, i.created_at, i.updated_at, i.assigned_unit_id,
   u.callsign, r.name AS reporter, r.phone, ST_Y(i.location::geometry) AS lat, ST_X(i.location::geometry) AS lng
   FROM incidents i LEFT JOIN units u ON u.id=i.assigned_unit_id LEFT JOIN users r ON r.id=i.reporter_id`;
+const hasValue = (value) => value !== null && value !== undefined && String(value).trim() !== '';
 const validCoords = (lat, lng) => Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
 
 export function apiRouter(emit) {
@@ -16,7 +17,7 @@ export function apiRouter(emit) {
   // Victim (or anyone signed in) raises an SOS
   r.post('/incidents', requireAuth(), async (req, res) => {
     const lat = Number(req.body.lat), lng = Number(req.body.lng);
-    if (req.body.lat == null || req.body.lng == null || !validCoords(lat, lng))
+    if (!hasValue(req.body.lat) || !hasValue(req.body.lng) || !validCoords(lat, lng))
       return res.status(400).json({ error: 'Valid lat/lng required' });
     const severity = ['minor', 'serious', 'critical'].includes(req.body.severity) ? req.body.severity : 'unknown';
     const description = String(req.body.description || '').slice(0, 500);
@@ -78,7 +79,8 @@ export function apiRouter(emit) {
 
   r.patch('/units/:id/location', staff, async (req, res) => {
     const lat = Number(req.body.lat), lng = Number(req.body.lng);
-    if (!validCoords(lat, lng)) return res.status(400).json({ error: 'Valid lat/lng required' });
+    if (!hasValue(req.body.lat) || !hasValue(req.body.lng) || !validCoords(lat, lng))
+      return res.status(400).json({ error: 'Valid lat/lng required' });
     const { rows: [u] } = await pool.query(
       `UPDATE units SET location=ST_MakePoint($3,$2)::geography, updated_at=now() WHERE id=$1 RETURNING id`, [req.params.id, lat, lng]);
     if (!u) return res.status(404).json({ error: 'Not found' });
