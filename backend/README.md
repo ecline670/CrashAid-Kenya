@@ -3,9 +3,20 @@
 Node 20, Express 5, PostgreSQL 15 + PostGIS, Redis, BullMQ, Socket.io, JWT.
 
 ## Run locally
+
+From the repository root, run the complete stack with Docker Compose:
+
+```
+docker compose up --build
+```
+
+The dispatcher console will be available at http://localhost:8080 and the API at http://localhost:4000.
+
+For a backend-only setup:
+
 ```
 cp .env.example .env        # set JWT_SECRET
-docker compose up -d --build
+docker compose -f docker-compose.yml up -d --build
 # tables and the dispatcher login (ADMIN_EMAIL / ADMIN_PASSWORD) are created automatically on first start
 ```
 API: http://localhost:4000 (health: /health)

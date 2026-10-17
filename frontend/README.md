@@ -4,6 +4,17 @@ React 18 + Vite, Zustand, Axios, Socket.io-client, React Router, Tabler Icons, D
 Pages: Login, Dashboard, Incidents, Incident detail, Units, Providers, Settings.
 
 ## Run locally
+
+The recommended all-in-one setup is from the repository root:
+
+```
+docker compose up --build
+```
+
+Open http://localhost:8080. Nginx serves the production build and proxies `/api` and Socket.IO traffic to the backend container.
+
+For frontend-only development:
+
 ```
 npm install
 npm run dev     # http://localhost:5173, proxies /api and websockets to the backend on :4000
